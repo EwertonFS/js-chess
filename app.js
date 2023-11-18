@@ -5,6 +5,8 @@ const playerDislpay = document.querySelector("#player")
 const infoDisplay = document.querySelector('#info')
 const width = 8
 console.log(width)
+//let playerGo='black'
+//playerDisplay.textContent='black'
 
 
 const startPieces = [
@@ -25,17 +27,20 @@ function createBoard(){
     startPieces.forEach((startPiece,i) => {
         /* Melhor opção = createElement , + seguro,+performace,(-) maiorTamanho*/
         const square = document.createElement('div')
+        //adcionando css 
         square.classList.add('square')
         /*+ curto , utilizar quando vier fonte dados mais seguros como bd*/
         square.innerHTML = startPiece;
-        /*Essa linha torna arrastavel draggable - atributo global*/
+        /*Para o caso de existir Essa linha torna arrastavel draggable - atributo global*/
+        /*Isso é útil para evitar erros ao acessar propriedades aninhadas de objetos quando não temos certeza se uma determinada propriedade existe , se n retornaria undifened interrompendo.*/
         square.firstChild?.setAttribute('draggable',true)
         /* setAttribute para alterar o valor de um atributo class ou id em um elemento HTML2. */
         square.setAttribute('square-id',i)
         /* square.classList.add('beige') */
 
         /* cores tabuleiros*/
-        /*Math.floor -retorna o maior número inteiro que é menor ou igual a um número1. */
+        /*Math.floor -retorna o maior número inteiro que é menor ou igual a um número 1. */
+        /*Arrendondado para baixo em seguida adcionando 1 para contagem ficar correra o index zero passe a ser o index 1*/
         const row = Math.floor((63 - i) /8) + 1
 
         if(row % 2 === 0){
@@ -44,7 +49,8 @@ function createBoard(){
             square.classList.add(i % 2 === 0 ? "brown" : "beige")
         }
 
-        /*cores peças*/
+        /*cores peças e posicionamentos*/
+        //sçao duas tags ate se chegar ao elemento por isso firstChild firtChild
          if(i <= 15){
             square.firstChild.firstChild.classList.add('black')
         } 
@@ -65,27 +71,72 @@ createBoard()
 const allSquares = document.querySelectorAll("#gameboard .square")
 console.log(allSquares)
 
-/* O evento dragstart é disparado quando o usuário começa a arrastar um elemento ou uma seleção de texto */
+// O evento dragstart é disparado quando o usuário começa a arrastar um elemento ou uma seleção //de texto 
+
 allSquares.forEach(square => {
     square.addEventListener('dragstart',dragStart)
+    square.addEventListener('dragover',dragOver)
+    square.addEventListener('drop',dragDrop)
 })
 
 
-/*capturando o id do elemento peca*/
-let startPosTitionId
-let draggedElement
+// Variáveis globais
+let startPosTitionId;
+let draggedElement;
 
-function dragStart(e){
-    /* console.log(e.target.parentNode.getAttribute('square-id')) */
-    startPosTitionId = e.target.parentNode.getAttribute('square-id')
-    draggedElement= e.target
+// Função para iniciar o arrasto
+function dragStart(e) {
+    // Capturando o id do elemento pai da peça que está sendo arrastada
+    startPosTitionId = e.target.parentNode.getAttribute('square-id');
+    // Armazenando o elemento que está sendo arrastado
+    draggedElement = e.target;
 }
 
-function dragOver(e){
-    e.preventDefault()
+// Função para permitir o arrasto sobre um elemento
+function dragOver(e) {
+    e.preventDefault();
+}
+
+// Função para soltar o elemento arrastado
+function dragDrop(e) {
+    // ele impede o evento de borbulhar até os elementos pai ou capturar até os elementos filho
+    e.stopPropagation();
+
+    // console.log(e.target)
+    const taken = e.target.classList.contains('piece')
+    
+    
+    // Anexando o elemento arrastado ao elemento alvo
+    // e.target.parentNode.append(draggedElement);
+    //e.target.remove() 
+    //e.target.append(draggedElement)
+    changePlayer()
+}
+
+ function changePlayer(){
+    if(playerGo === 'black'){ 
+        // reverseIds(); 
+        playerGo = 'white';
+        playerDisplay.textContent='white';
+    }else{
+        revertIds();
+        playerGo = 'black';
+        playerDisplay.textContent='black';
+    }
 }
 
 
+function reverseIds(){
+    const allSquares = document.querySelectorAll(".square");
+    allSquares.forEach((square,i)=>
+        square.setAttribute('square-id',(width * width -1)-i));
+}
+
+function revertIds(){
+    const allSquares = document.querySelectorAll(".square");
+    allSquares.forEach((square,i)=>
+        square.setAttribute('square-id',i));
+} 
 
  
 
